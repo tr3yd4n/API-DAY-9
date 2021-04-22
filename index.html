@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
+        integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" />
+
+    <title>Front Page</title>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-md navbar-light bg-light">
+        <a class="navbar-brand" href="./index.html">
+            CRUD Control Center<small><sub>TM</sub></small>
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
+            aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+            <div class="navbar-nav">
+                <a class="nav-link active" href="./index.html">Home <span class="sr-only">(current)</span></a>
+                <a class="nav-link" data-toggle="modal" data-target="#newModal" href="#">Post New</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-10 col-md-6 mx-auto">
+                <h1 class="text-center my-5">All entries</h1>
+                <div id="spinner" class="text-center">
+                    <div class="spinner-border text-secondary" role="status">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                </div>
+                <ul id="event-list" class="list-group d-none">
+                    <!-- Event List Entrypoint -->
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade mt-5" id="resultsModal" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title text-center">Details</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body"></div>
+                <div class="modal-footer"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade mt-5" id="editModal" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title text-center">Edit Details</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body"></div>
+                <div class="modal-footer"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade mt-5" id="deleteModal" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title text-center">Are You Sure?</h4>
+                </div>
+                <div class="modal-body"></div>
+                <div class="modal-footer"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade mt-5" id="newModal" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title text-center">New Entry</h4>
+                </div>
+                <div class="modal-body">
+                    <form onsubmit="postData(event)">
+                        <label class="ml-2" for="post-name">Name</label>
+                        <input id="post-name" type="text" class="form-control mb-2" placeholder="Name..." required />
+
+                        <label class="ml-2" for="post-description">Description</label>
+                        <input id="post-description" type="text" class="form-control mb-2" placeholder="Description..."
+                            required />
+
+                        <label class="ml-2" for="post-brand">Brand</label>
+                        <input id="post-brand" type="text" class="form-control mb-2" placeholder="Brand..." required />
+
+                        <label class="ml-2" for="post-imageUrl">Image URL</label>
+                        <input id="post-imageUrl" type="url" class="form-control mb-2" placeholder="Image URL..."
+                            required />
+
+                        <label class="ml-2" for="post-price">Price</label>
+                        <input id="post-price" type="number" class="form-control mb-2" placeholder="Price..."
+                            step="0.01" required />
+
+                        <div class="d-flex">
+                            <input type="submit" class="btn btn-success w-50 mx-auto mt-3" value="Create" />
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const endpoint = "https://striveschool-api.herokuapp.com/api/product/"
+
+        window.onload = async () => {
+            try {
+                const data = await loadData(endpoint)
+                populateList(data)
+            } catch (error) {
+                console.error(`Failed on ${window.name} with error ${error.message}`)
+            }
+        }
+
+        const loadData = async endpoint => {
+            try {
+                const response = await fetch(endpoint, {
+                    headers: {
+                        Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MDgwMGU5Y2IxZjBmYjAwMTVkOTE3MGMiLCJpYXQiOjE2MTkwMDUwODQsImV4cCI6MTYyMDIxNDY4NH0.g7jMheL_T_9M884BUoPCOuoZKlexshqRDDspOxxUOwQ"
+                    }
+                })
+                if (!response.ok) throw new Error(`${loadData.name} failed to load from ${endpoint}`)
+                return await response.json()
+            } catch (error) {
+                console.error(`Failed on ${loadData.name} with error ${error.message}`)
+                document.getElementById("spinner").classList.add("d-none")
+            }
+        }
+        const editEntry = async id => {
+            const nameField = document.querySelector("#editForm #name")
+            const descField = document.querySelector("#editForm #description")
+            const brandField = document.querySelector("#editForm #brand")
+            const imgUrlField = document.querySelector("#editForm #imageUrl")
+            const priceField = document.querySelector("#editForm #price")
+
+            const fields = {
+                name: nameField.value,
+                description: descField.value,
+                brand: brandField.value,
+                imageUrl: imgUrlField.value,
+                price: priceField.value
+            }
+
+            try {
+                const response = await fetch(endpoint + id, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MDgwMGU5Y2IxZjBmYjAwMTVkOTE3MGMiLCJpYXQiOjE2MTkwMDUwODQsImV4cCI6MTYyMDIxNDY4NH0.g7jMheL_T_9M884BUoPCOuoZKlexshqRDDspOxxUOwQ"
+                    },
+                    body: JSON.stringify(fields)
+                })
+                if (!response.ok) throw new Error(`${editEntry.name} failed`)
+                location.assign("./index.html")
+            } catch (error) {
+                console.error(`Failed on ${editEntry.name} with error ${error.message}`)
+            }
+        }
+        const deleteEntry = async id => {
+            try {
+                const response = await fetch(endpoint + id, {
+                    method: "DELETE",
+                    headers: {
+                        Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MDgwMGU5Y2IxZjBmYjAwMTVkOTE3MGMiLCJpYXQiOjE2MTkwMDUwODQsImV4cCI6MTYyMDIxNDY4NH0.g7jMheL_T_9M884BUoPCOuoZKlexshqRDDspOxxUOwQ"
+                    }
+                })
+                if (!response.ok) throw new Error(`${deleteEntry.name} failed`)
+                location.assign("./index.html")
+            } catch (error) {
+                console.error(`Failed on ${deleteEntry.name} with error ${error.message}`)
+            }
+        }
+        const openResultsModal = async id => {
+            const details = await loadData(endpoint + id)
+
+            const modalBody = document.querySelector("#resultsModal .modal-body")
+            const modalFooter = document.querySelector("#resultsModal .modal-footer")
+
+            modalBody.innerHTML = ""
+            modalBody.innerHTML += `
+                <p>Name: ${details.name}</p>
+                <p>Description: ${details.description}</p>
+                <p>Brand: ${details.brand}</p>
+                <p>Price: $${details.price}</p>
+                <img class="img-fluid" src="${details.imageUrl}" alt="${details.name}"/>
+                `
+
+            modalFooter.innerHTML = ""
+            modalFooter.innerHTML += `
+                <small class="text-muted mr-auto">${details._id}</small>
+                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteModal" data-dismiss="modal" onclick="openDeleteModal('${details._id}')"><i class="bi bi-trash"></i></button>
+                <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#editModal" data-dismiss="modal" onclick="openEditModal('${details._id}')"><i class="bi bi-pencil"></i></button>
+                <button type="button" class="btn btn-light" data-dismiss="modal">Close</button>
+                `
+        }
+        const openEditModal = async id => {
+            const details = await loadData(endpoint + id)
+
+            const modalBody = document.querySelector("#editModal .modal-body")
+            const modalFooter = document.querySelector("#editModal .modal-footer")
+
+            modalBody.innerHTML = ""
+            modalBody.innerHTML += `
+                    <form id="editForm">
+                        <label class="ml-2" for="name">Edit Name</label>
+                        <input id="name" type="text" class="form-control mb-2" value="${details.name}" placeholder="Name..." />
+                        <label class="ml-2" for="description">Edit Description</label>
+                        <input id="description" type="text" class="form-control mb-2" value="${details.description}" placeholder="Description..." />
+                        <label class="ml-2" for="brand">Edit Brand</label>
+                        <input id="brand" type="text" class="form-control mb-2" value="${details.brand}" placeholder="Brand..." />
+                        <label class="ml-2" for="imageUrl">Edit Image URL</label>
+                        <input id="imageUrl" type="url" class="form-control mb-2" value="${details.imageUrl}" placeholder="Image URL..." />
+                        <label class="ml-2" for="price">Edit Price</label>
+                        <input id="price" type="number" class="form-control mb-2" value="${details.price}" placeholder="Price..." step="0.01" />
+                    </form>
+                    `
+
+            modalFooter.innerHTML = ""
+            modalFooter.innerHTML += `
+                <small class="text-muted mr-auto">${details._id}</small>
+                <button type="button" class="btn btn-success" onclick="editEntry('${details._id}')">Save</button>
+                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#resultsModal" data-dismiss="modal">Discard</button>
+                `
+        }
+        const openDeleteModal = async id => {
+            console.log("delete")
+            const details = await loadData(endpoint + id)
+
+            const modalBody = document.querySelector("#deleteModal .modal-body")
+            const modalFooter = document.querySelector("#deleteModal .modal-footer")
+
+            modalBody.innerHTML = ""
+            modalBody.innerHTML += `<p>This will delete ${details.name} permanently</p>`
+
+            modalFooter.innerHTML = ""
+            modalFooter.innerHTML += `
+                <button type="button" class="btn btn-danger" data-dismiss="modal" onclick="deleteEntry('${details._id}')">Yes</button>
+                <button type="button" class="btn btn-light" data-toggle="modal" data-target="#resultsModal" data-dismiss="modal">No</button>
+                `
+        }
+        const populateList = items => {
+            const parent = document.getElementById("event-list")
+            const spinner = document.getElementById("spinner")
+
+            parent.innerHTML = ""
+            for (let item of items) {
+                parent.innerHTML += `
+                    <li class="d-flex list-group-item">
+                        <span>${item.name}</span>
+                        <span class="ml-auto">$${item.price}</span>
+                        <a class="ml-3" data-toggle="modal" data-target="#resultsModal" onclick="openResultsModal('${item._id}')" href="#">Details</a>
+                    </li>`
+            }
+
+            if (!items.length > 0)
+                parent.innerHTML += `
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    <strong>No Entries!</strong> You should create some in the back office.
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    `
+
+            spinner.classList.add("d-none")
+            parent.classList.remove("d-none")
+        }
+        const postData = async event => {
+            // Stops the submit button from refreshing the page
+            event.preventDefault()
+
+            const userData = {
+                name: document.getElementById("post-name").value,
+                description: document.getElementById("post-description").value,
+                price: document.getElementById("post-price").value,
+                brand: document.getElementById("post-brand").value,
+                imageUrl: document.getElementById("post-imageUrl").value
+            }
+
+            try {
+                const response = await fetch(endpoint, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MDgwMGU5Y2IxZjBmYjAwMTVkOTE3MGMiLCJpYXQiOjE2MTkwMDUwODQsImV4cCI6MTYyMDIxNDY4NH0.g7jMheL_T_9M884BUoPCOuoZKlexshqRDDspOxxUOwQ"
+                    },
+                    body: JSON.stringify(userData)
+                })
+
+                if (!response.ok) throw new Error(`${postData.name} failed`)
+
+                const data = await response.json()
+                location.assign("./index.html")
+            } catch (error) {
+                console.error(error.message)
+            }
+        }
+    </script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-Piv4xVNRyMGpqkS2by6br4gNJ7DXjqk09RmUpJ8jgGtD7zP9yug3goQfGII0yAns"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>
